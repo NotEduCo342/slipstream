@@ -93,9 +93,29 @@ jobs:
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
-        $env:OPENSSL_CRYPTO_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libcrypto.lib"
-        $env:OPENSSL_SSL_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libssl.lib"
-        # If libs are not in lib/, try lib/VC/x64/ or similar if you saw that in debug
+        # Since libcrypto.lib wasn't found, assume it might be a static build with specific naming or different location
+        # Try to find any .lib file in the OpenSSL directory to understand the structure
+        $lib_files = Get-ChildItem -Path "$env:OPENSSL_ROOT_DIR" -Recurse -Filter "*.lib"
+        if ($lib_files) {
+            echo "Found .lib files:"
+            $lib_files | ForEach-Object { $_.FullName }
+            
+            # Heuristic to find the crypto lib
+            $crypto_lib = $lib_files | Where-Object { $_.Name -match "crypto" } | Select-Object -First 1
+            $ssl_lib = $lib_files | Where-Object { $_.Name -match "ssl" } | Select-Object -First 1
+            
+            if ($crypto_lib) {
+                echo "Setting OPENSSL_CRYPTO_LIBRARY to $($crypto_lib.FullName)"
+                $env:OPENSSL_CRYPTO_LIBRARY = $crypto_lib.FullName
+            }
+            if ($ssl_lib) {
+                 echo "Setting OPENSSL_SSL_LIBRARY to $($ssl_lib.FullName)"
+                $env:OPENSSL_SSL_LIBRARY = $ssl_lib.FullName
+            }
+        } else {
+             echo "No .lib files found in OpenSSL directory!"
+        }
+
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

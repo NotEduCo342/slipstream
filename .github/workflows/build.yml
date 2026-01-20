@@ -50,12 +50,36 @@ jobs:
         choco install openssl --no-progress
         choco install pkgconfiglite
 
+    - name: Install dependencies
+      run: |
+        pip install meson ninja
+        choco install openssl --no-progress
+        choco install pkgconfiglite
+
+    - name: Find OpenSSL
+      shell: pwsh
+      run: |
+        $possible_paths = @(
+            "C:\Program Files\OpenSSL-Win64",
+            "C:\Program Files\OpenSSL",
+            "C:\OpenSSL-Win64",
+            "C:\OpenSSL"
+        )
+        foreach ($path in $possible_paths) {
+            if (Test-Path $path) {
+                echo "Found OpenSSL at: $path"
+                echo "OPENSSL_ROOT_DIR=$path" >> $env:GITHUB_ENV
+                exit 0
+            }
+        }
+        echo "Could not find OpenSSL installation directory. Listing Program Files:"
+        ls "C:\Program Files"
+        exit 1
+
     - name: Configure Meson
       shell: pwsh
       run: |
-        $env:OPENSSL_ROOT_DIR = "C:\Program Files\OpenSSL-Win64"
-        echo "Listing OpenSSL dir to verify:"
-        ls "C:\Program Files\OpenSSL-Win64"
+        echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

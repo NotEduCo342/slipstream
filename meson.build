@@ -55,6 +55,24 @@ cmake = import('cmake')
 # Get the cmake options objects
 picoquic_opts = cmake.subproject_options()
 
+# Pass custom OpenSSL paths to CMake subproject if specified
+ossl_root = get_option('openssl_root')
+if ossl_root != ''
+  picoquic_opts.add_cmake_defines({'OPENSSL_ROOT_DIR': ossl_root})
+endif
+ossl_crypto = get_option('openssl_crypto_lib')
+if ossl_crypto != ''
+  picoquic_opts.add_cmake_defines({'OPENSSL_CRYPTO_LIBRARY': ossl_crypto})
+endif
+ossl_ssl = get_option('openssl_ssl_lib')
+if ossl_ssl != ''
+  picoquic_opts.add_cmake_defines({'OPENSSL_SSL_LIBRARY': ossl_ssl})
+endif
+ossl_inc = get_option('openssl_include')
+if ossl_inc != ''
+  picoquic_opts.add_cmake_defines({'OPENSSL_INCLUDE_DIR': ossl_inc})
+endif
+
 # Add necessary CMake defines
 picoquic_opts.add_cmake_defines(
   [

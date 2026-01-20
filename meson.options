@@ -1,3 +1,9 @@
 # Enable picoquic-log
 option('build_loglib', type : 'boolean', value: false)
 
+# OpenSSL paths for Windows (or custom builds)
+option('openssl_root', type : 'string', value : '', description : 'Root directory of OpenSSL')
+option('openssl_crypto_lib', type : 'string', value : '', description : 'Path to libcrypto')
+option('openssl_ssl_lib', type : 'string', value : '', description : 'Path to libssl')
+option('openssl_include', type : 'string', value : '', description : 'Path to OpenSSL include directory')
+

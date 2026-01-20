@@ -110,9 +110,12 @@ jobs:
         $env:OPENSSL_SSL_LIBRARY = $ssl_lib
         $env:OPENSSL_INCLUDE_DIR = Join-Path $env:OPENSSL_ROOT_DIR "include"
 
-        # Also set CMake variables directly via -D options to bypass FindOpenSSL logic if needed
+        # Pass options to Meson, which will pass them to CMake subproject
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build `
-            "-Dcmake_args=['-DOPENSSL_ROOT_DIR=$($env:OPENSSL_ROOT_DIR)', '-DOPENSSL_CRYPTO_LIBRARY=$($env:OPENSSL_CRYPTO_LIBRARY)', '-DOPENSSL_SSL_LIBRARY=$($env:OPENSSL_SSL_LIBRARY)', '-DOPENSSL_INCLUDE_DIR=$($env:OPENSSL_INCLUDE_DIR)']"
+            "-Dopenssl_root=$($env:OPENSSL_ROOT_DIR)" `
+            "-Dopenssl_crypto_lib=$($env:OPENSSL_CRYPTO_LIBRARY)" `
+            "-Dopenssl_ssl_lib=$($env:OPENSSL_SSL_LIBRARY)" `
+            "-Dopenssl_include=$($env:OPENSSL_INCLUDE_DIR)"
 
     - name: Compile
       run: meson compile -C build

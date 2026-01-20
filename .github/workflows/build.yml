@@ -83,8 +83,20 @@ jobs:
         "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
         "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
 
-    - name: Configure Meson
+    - name: Debug OpenSSL environment
       shell: pwsh
+      run: |
+        Write-Host "OPENSSL_ROOT_DIR=$env:OPENSSL_ROOT_DIR"
+        Write-Host "OPENSSL_CRYPTO_LIBRARY=$env:OPENSSL_CRYPTO_LIBRARY"
+        Write-Host "OPENSSL_SSL_LIBRARY=$env:OPENSSL_SSL_LIBRARY"
+        Write-Host "OPENSSL_INCLUDE_DIR=$env:OPENSSL_INCLUDE_DIR"
+        Write-Host "--- Listing OpenSSL root ---"
+        Get-ChildItem -Path $env:OPENSSL_ROOT_DIR -Recurse | Select-Object FullName
+
+    - name: Configure Meson
+      id: meson_configure
+      shell: pwsh
+      continue-on-error: true
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
 
@@ -106,6 +118,21 @@ jobs:
             "-Dopenssl_crypto_lib=$crypto_lib" `
             "-Dopenssl_ssl_lib=$ssl_lib" `
             "-Dopenssl_include=$include_dir"
+
+    - name: Show Meson log
+      if: always()
+      shell: pwsh
+      run: |
+        if (Test-Path "build/meson-logs/meson-log.txt") {
+          Get-Content "build/meson-logs/meson-log.txt"
+        } else {
+          Write-Host "No meson log found."
+        }
+
+    - name: Fail if Meson configure failed
+      if: steps.meson_configure.outcome != 'success'
+      shell: pwsh
+      run: exit 1
 
     - name: Compile
       run: meson compile -C build

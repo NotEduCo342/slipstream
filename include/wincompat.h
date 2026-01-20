@@ -8,6 +8,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifndef __attribute__
+#define __attribute__(x)
+#endif
+
 #ifndef ssize_t
 typedef SSIZE_T ssize_t;
 #endif

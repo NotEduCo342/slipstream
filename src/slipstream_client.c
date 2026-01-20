@@ -1,7 +1,9 @@
 // ReSharper disable CppDFAUnreachableCode
+#define _POSIX_C_SOURCE 200809L
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <netdb.h>
 #include <picoquic.h>
 #include <picoquic_packet_loop.h>
 #include <picosocks.h>

@@ -76,9 +76,10 @@ endif
 # Provide a wincompat.h shim for MSVC builds
 if host_machine.system() == 'windows'
   wincompat_inc = meson.current_source_dir() / 'include'
+  wincompat_hdr = wincompat_inc / 'wincompat.h'
   picoquic_opts.add_cmake_defines({
-    'CMAKE_C_FLAGS': '/I' + wincompat_inc,
-    'CMAKE_CXX_FLAGS': '/I' + wincompat_inc,
+    'CMAKE_C_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr,
+    'CMAKE_CXX_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr,
   })
 endif
 

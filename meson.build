@@ -100,6 +100,8 @@ picoquic_proj = cmake.subproject(
 slipstream_cli_deps = [
   dependency('threads'), # for picoquic
   picoquic_proj.dependency('picoquic-core'),
+  picoquic_proj.dependency('picotls-core'),
+  picoquic_proj.dependency('picotls-openssl'),
 ]
 # Link optional picoquic logging
 if loglib_enabled

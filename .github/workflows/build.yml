@@ -56,7 +56,7 @@ jobs:
         choco install openssl --no-progress
         choco install pkgconfiglite
 
-    - name: Find OpenSSL
+    - name: Find and Debug OpenSSL
       shell: pwsh
       run: |
         $possible_paths = @(
@@ -65,24 +65,34 @@ jobs:
             "C:\OpenSSL-Win64",
             "C:\OpenSSL"
         )
+        $openssl_root = ""
         foreach ($path in $possible_paths) {
             if (Test-Path $path) {
                 echo "Found OpenSSL at: $path"
-                echo "OPENSSL_ROOT_DIR=$path" >> $env:GITHUB_ENV
-                exit 0
+                $openssl_root = $path
+                break
             }
         }
-        echo "Could not find OpenSSL installation directory. Listing Program Files:"
-        ls "C:\Program Files"
-        exit 1
+        if (-not $openssl_root) {
+            echo "Assuming OpenSSL might be in standard paths or not found."
+            # Fallback to standard
+            $openssl_root = "C:\Program Files\OpenSSL-Win64"
+        }
+
+        echo "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
+        
+        echo "--- Debug: Listing OpenSSL Directory ---"
+        if (Test-Path $openssl_root) {
+            Get-ChildItem -Path $openssl_root -Recurse | Select-Object FullName
+        } else {
+            echo "Path $openssl_root does not exist."
+        }
+        echo "--- End Debug ---"
 
     - name: Configure Meson
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
-        # Force FindOpenSSL to check the 'lib' subdirectory for static libs
-        $env:OPENSSL_CRYPTO_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libcrypto.lib"
-        $env:OPENSSL_SSL_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libssl.lib"
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

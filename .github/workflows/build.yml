@@ -114,6 +114,12 @@ jobs:
 
         $env:CC = "cl"
         $env:CXX = "cl"
+        $env:CMAKE_C_COMPILER = "cl"
+        $env:CMAKE_CXX_COMPILER = "cl"
+        $env:CMAKE_GENERATOR = "Ninja"
+
+        Write-Host "cl location:";
+        where.exe cl
 
         # Normalize paths to forward slashes to avoid CMake escaping issues
         $root_dir = $env:OPENSSL_ROOT_DIR -replace '\\', '/'

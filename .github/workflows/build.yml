@@ -78,10 +78,19 @@ jobs:
           exit 1
         }
 
-        "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
-        "OPENSSL_CRYPTO_LIBRARY=$($crypto.FullName)" >> $env:GITHUB_ENV
-        "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
-        "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
+        $ossl_root_slim = "C:\openssl"
+        $ossl_lib_slim = Join-Path $ossl_root_slim "lib"
+        $ossl_inc_slim = Join-Path $ossl_root_slim "include"
+        New-Item -ItemType Directory -Force -Path $ossl_lib_slim | Out-Null
+        New-Item -ItemType Directory -Force -Path $ossl_inc_slim | Out-Null
+        Copy-Item -Force $crypto.FullName (Join-Path $ossl_lib_slim "libcrypto.lib")
+        Copy-Item -Force $ssl.FullName (Join-Path $ossl_lib_slim "libssl.lib")
+        Copy-Item -Recurse -Force $include_dir\* $ossl_inc_slim
+
+        "OPENSSL_ROOT_DIR=$ossl_root_slim" >> $env:GITHUB_ENV
+        "OPENSSL_CRYPTO_LIBRARY=$ossl_lib_slim\libcrypto.lib" >> $env:GITHUB_ENV
+        "OPENSSL_SSL_LIBRARY=$ossl_lib_slim\libssl.lib" >> $env:GITHUB_ENV
+        "OPENSSL_INCLUDE_DIR=$ossl_inc_slim" >> $env:GITHUB_ENV
 
     - name: Debug OpenSSL environment
       shell: pwsh

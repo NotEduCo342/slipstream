@@ -1,0 +1,36 @@
+name: Build Slipstream
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build on Linux (amd64)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y meson cmake pkg-config libssl-dev ninja-build clang
+
+    - name: Configure Meson
+      run: meson setup --buildtype=release -Db_lto=true --warnlevel=0 build
+
+    - name: Compile
+      run: meson compile -C build
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: slipstream-binaries
+        path: |
+          build/slipstream-client
+          build/slipstream-server

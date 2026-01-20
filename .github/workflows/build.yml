@@ -93,6 +93,9 @@ jobs:
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
+        $env:OPENSSL_CRYPTO_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libcrypto.lib"
+        $env:OPENSSL_SSL_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libssl.lib"
+        # If libs are not in lib/, try lib/VC/x64/ or similar if you saw that in debug
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

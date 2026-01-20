@@ -1,6 +1,12 @@
 #pragma once
 
-#ifdef _WIN32
+#ifndef _WIN32
+    #if defined(__GNUC__) || defined(__clang__)
+        #include_next <pthread.h>
+    #else
+        #include <pthread.h>
+    #endif
+#else
 #include <windows.h>
 
 #ifdef __cplusplus

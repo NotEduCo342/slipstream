@@ -10,10 +10,6 @@ extern "C" {
 
 #ifndef _TIMEVAL_DEFINED
 #define _TIMEVAL_DEFINED
-struct timeval {
-    long tv_sec;
-    long tv_usec;
-};
 #endif
 
 static inline int gettimeofday(struct timeval *tv, void *tz) {

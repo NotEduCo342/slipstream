@@ -50,76 +50,55 @@ jobs:
         choco install openssl --no-progress
         choco install pkgconfiglite
 
-    - name: Install dependencies
-      run: |
-        pip install meson ninja
-        choco install openssl --no-progress
-        choco install pkgconfiglite
-
-    - name: Find and Debug OpenSSL
+    - name: Resolve OpenSSL paths
       shell: pwsh
       run: |
-        $possible_paths = @(
-            "C:\Program Files\OpenSSL-Win64",
-            "C:\Program Files\OpenSSL",
-            "C:\OpenSSL-Win64",
-            "C:\OpenSSL"
-        )
-        $openssl_root = ""
-        foreach ($path in $possible_paths) {
-            if (Test-Path $path) {
-                echo "Found OpenSSL at: $path"
-                $openssl_root = $path
-                break
-            }
-        }
-        if (-not $openssl_root) {
-            echo "Assuming OpenSSL might be in standard paths or not found."
-            # Fallback to standard
-            $openssl_root = "C:\Program Files\OpenSSL-Win64"
-        }
+      $possible_roots = @(
+        "C:\Program Files\OpenSSL-Win64",
+        "C:\Program Files\OpenSSL",
+        "C:\OpenSSL-Win64",
+        "C:\OpenSSL"
+      )
+      $openssl_root = $possible_roots | Where-Object { Test-Path $_ } | Select-Object -First 1
+      if (-not $openssl_root) {
+        Write-Error "OpenSSL root not found."
+        exit 1
+      }
 
-        echo "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
-        
-        echo "--- Debug: Listing OpenSSL Directory ---"
-        if (Test-Path $openssl_root) {
-            Get-ChildItem -Path $openssl_root -Recurse | Select-Object FullName
-        } else {
-            echo "Path $openssl_root does not exist."
-        }
-        echo "--- End Debug ---"
+      $crypto = Get-ChildItem -Path $openssl_root -Recurse -Filter "libcrypto.lib" | Select-Object -First 1
+      $ssl = Get-ChildItem -Path $openssl_root -Recurse -Filter "libssl.lib" | Select-Object -First 1
+      if (-not $crypto -or -not $ssl) {
+        Write-Error "OpenSSL libraries not found under $openssl_root"
+        exit 1
+      }
+
+      $include_dir = Join-Path $openssl_root "include"
+      if (-not (Test-Path $include_dir)) {
+        Write-Error "OpenSSL include dir not found: $include_dir"
+        exit 1
+      }
+
+      "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
+      "OPENSSL_CRYPTO_LIBRARY=$($crypto.FullName)" >> $env:GITHUB_ENV
+      "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
+      "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
 
     - name: Configure Meson
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
-        
-        # Explicitly choose the MD (Multi-threaded DLL) release libraries
-        # This matches the standard "release" build type
-        $lib_dir = Join-Path $env:OPENSSL_ROOT_DIR "lib\VC\x64\MD"
-        $crypto_lib = Join-Path $lib_dir "libcrypto.lib"
-        $ssl_lib = Join-Path $lib_dir "libssl.lib"
 
-        if (-not (Test-Path $crypto_lib)) {
-            echo "Error: Could not find $crypto_lib"
-            exit 1
-        }
-
-        echo "Explicitly setting libraries from: $lib_dir"
-        
         # Normalize paths to forward slashes to avoid CMake escaping issues
         $root_dir = $env:OPENSSL_ROOT_DIR -replace '\\', '/'
-        $crypto_lib = $crypto_lib -replace '\\', '/'
-        $ssl_lib = $ssl_lib -replace '\\', '/'
-        $include_dir = "$root_dir/include"
+        $crypto_lib = $env:OPENSSL_CRYPTO_LIBRARY -replace '\\', '/'
+        $ssl_lib = $env:OPENSSL_SSL_LIBRARY -replace '\\', '/'
+        $include_dir = $env:OPENSSL_INCLUDE_DIR -replace '\\', '/'
 
         echo "Normalized paths:"
         echo "Root: $root_dir"
         echo "Crypto: $crypto_lib"
         echo "SSL: $ssl_lib"
-        
-        # Clean environment variables that might confuse FindOpenSSL if explicit paths are overridden
-        Remove-Item Env:\OPENSSL_ROOT_DIR -ErrorAction SilentlyContinue
+        echo "Include: $include_dir"
 
         # Pass options to Meson
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build `

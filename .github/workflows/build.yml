@@ -134,7 +134,7 @@ jobs:
         echo "Include: $include_dir"
 
         # Pass options to Meson
-        meson setup --buildtype=release -Db_lto=false --warnlevel=0 -Dcmake_generator=Ninja build `
+        meson setup --buildtype=release -Db_lto=false --warnlevel=0 build `
             "-Dopenssl_root=$root_dir" `
             "-Dopenssl_crypto_lib=$crypto_lib" `
             "-Dopenssl_ssl_lib=$ssl_lib" `

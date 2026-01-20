@@ -1,0 +1,12 @@
+Build started at 2026-01-20T21:49:09.639666
+Main binary: C:\hostedtoolcache\windows\Python\3.12.10\x64\python.exe
+Build Options: -Db_lto=false -Dcmake_generator=Ninja -Dopenssl_root=C:/openssl -Dopenssl_crypto_lib=C:/openssl/lib/libcrypto.lib -Dopenssl_ssl_lib=C:/openssl/lib/libssl.lib -Dopenssl_include=C:/openssl/include -Dbuildtype=release -Dwarning_level=0
+Python system: Windows
+The Meson build system
+Version: 1.10.1
+Source dir: D:\a\slipstream\slipstream
+Build dir: D:\a\slipstream\slipstream\build
+Build type: native build
+Not warning about meson.options with version minimum < 1.1 because meson_options.txt also exists
+
+meson.build:2:0: ERROR: Unknown option: "cmake_generator".

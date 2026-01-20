@@ -24,6 +24,10 @@ typedef SSIZE_T ssize_t;
 #define strncasecmp _strnicmp
 #endif
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
 #ifndef inline
 #define inline __inline
 #endif

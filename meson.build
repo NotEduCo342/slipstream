@@ -105,6 +105,15 @@ slipstream_cli_deps = [
   picoquic_proj.dependency('picotls-minicrypto'),
   picoquic_proj.dependency('picotls-fusion'),
 ]
+
+if host_machine.system() == 'windows'
+  slipstream_cli_deps += [
+    meson.get_compiler('c').find_library('ws2_32'),
+    meson.get_compiler('c').find_library('iphlpapi'),
+    meson.get_compiler('c').find_library('crypt32'),
+  ]
+endif
+
 # Link optional picoquic logging
 if loglib_enabled
   slipstream_cli_deps += picoquic_proj.dependency('picoquic-log')

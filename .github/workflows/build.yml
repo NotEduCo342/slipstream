@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-linux:
     name: Build on Linux (amd64)
     runs-on: ubuntu-latest
 
@@ -30,7 +30,40 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: slipstream-binaries
+        name: slipstream-binaries-linux
         path: |
           build/slipstream-client
           build/slipstream-server
+
+  build-windows:
+    name: Build on Windows (amd64)
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        pip install meson ninja
+        choco install openssl
+        choco install pkgconfiglite
+
+    - name: Configure Meson
+      shell: pwsh
+      run: |
+        $env:OPENSSL_ROOT_DIR = "C:\Program Files\OpenSSL-Win64"
+        meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
+
+    - name: Compile
+      run: meson compile -C build
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: slipstream-binaries-windows
+        path: |
+          build/slipstream-client.exe
+          build/slipstream-server.exe
+

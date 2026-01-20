@@ -80,6 +80,9 @@ jobs:
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
+        # Force FindOpenSSL to check the 'lib' subdirectory for static libs
+        $env:OPENSSL_CRYPTO_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libcrypto.lib"
+        $env:OPENSSL_SSL_LIBRARY = "$env:OPENSSL_ROOT_DIR\lib\libssl.lib"
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

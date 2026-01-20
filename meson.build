@@ -73,6 +73,15 @@ if ossl_inc != ''
   picoquic_opts.add_cmake_defines({'OPENSSL_INCLUDE_DIR': ossl_inc})
 endif
 
+# Provide a wincompat.h shim for MSVC builds
+if host_machine.system() == 'windows'
+  wincompat_inc = meson.current_source_dir() / 'include'
+  picoquic_opts.add_cmake_defines({
+    'CMAKE_C_FLAGS': '/I' + wincompat_inc,
+    'CMAKE_CXX_FLAGS': '/I' + wincompat_inc,
+  })
+endif
+
 # Add necessary CMake defines
 picoquic_opts.add_cmake_defines(
   [

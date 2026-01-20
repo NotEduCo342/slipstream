@@ -1,6 +1,7 @@
 // ReSharper disable CppDFAUnreachableCode
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <picoquic.h>
 #include <picoquic_packet_loop.h>
 #include <picosocks.h>

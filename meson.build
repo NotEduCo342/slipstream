@@ -78,8 +78,8 @@ if host_machine.system() == 'windows'
   wincompat_inc = meson.current_source_dir() / 'include'
   wincompat_hdr = wincompat_inc / 'wincompat.h'
   picoquic_opts.add_cmake_defines({
-    'CMAKE_C_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr,
-    'CMAKE_CXX_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr,
+    'CMAKE_C_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr + ' /D_WINDOWS /DWIN32',
+    'CMAKE_CXX_FLAGS': '/I' + wincompat_inc + ' /FI' + wincompat_hdr + ' /D_WINDOWS /DWIN32',
   })
 endif
 

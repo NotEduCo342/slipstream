@@ -102,12 +102,18 @@ jobs:
         Write-Host "--- Listing OpenSSL root ---"
         Get-ChildItem -Path $env:OPENSSL_ROOT_DIR -Recurse | Select-Object FullName
 
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Configure Meson
       id: meson_configure
       shell: pwsh
       continue-on-error: true
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
+
+        $env:CC = "cl"
+        $env:CXX = "cl"
 
         # Normalize paths to forward slashes to avoid CMake escaping issues
         $root_dir = $env:OPENSSL_ROOT_DIR -replace '\\', '/'

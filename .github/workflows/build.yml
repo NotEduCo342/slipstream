@@ -106,16 +106,27 @@ jobs:
         }
 
         echo "Explicitly setting libraries from: $lib_dir"
-        $env:OPENSSL_CRYPTO_LIBRARY = $crypto_lib
-        $env:OPENSSL_SSL_LIBRARY = $ssl_lib
-        $env:OPENSSL_INCLUDE_DIR = Join-Path $env:OPENSSL_ROOT_DIR "include"
+        
+        # Normalize paths to forward slashes to avoid CMake escaping issues
+        $root_dir = $env:OPENSSL_ROOT_DIR -replace '\\', '/'
+        $crypto_lib = $crypto_lib -replace '\\', '/'
+        $ssl_lib = $ssl_lib -replace '\\', '/'
+        $include_dir = "$root_dir/include"
 
-        # Pass options to Meson, which will pass them to CMake subproject
+        echo "Normalized paths:"
+        echo "Root: $root_dir"
+        echo "Crypto: $crypto_lib"
+        echo "SSL: $ssl_lib"
+        
+        # Clean environment variables that might confuse FindOpenSSL if explicit paths are overridden
+        Remove-Item Env:\OPENSSL_ROOT_DIR -ErrorAction SilentlyContinue
+
+        # Pass options to Meson
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build `
-            "-Dopenssl_root=$($env:OPENSSL_ROOT_DIR)" `
-            "-Dopenssl_crypto_lib=$($env:OPENSSL_CRYPTO_LIBRARY)" `
-            "-Dopenssl_ssl_lib=$($env:OPENSSL_SSL_LIBRARY)" `
-            "-Dopenssl_include=$($env:OPENSSL_INCLUDE_DIR)"
+            "-Dopenssl_root=$root_dir" `
+            "-Dopenssl_crypto_lib=$crypto_lib" `
+            "-Dopenssl_ssl_lib=$ssl_lib" `
+            "-Dopenssl_include=$include_dir"
 
     - name: Compile
       run: meson compile -C build

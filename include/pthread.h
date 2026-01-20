@@ -13,29 +13,41 @@
 extern "C" {
 #endif
 
-typedef CRITICAL_SECTION pthread_mutex_t;
+typedef SRWLOCK pthread_mutex_t;
 typedef CONDITION_VARIABLE pthread_cond_t;
 typedef INIT_ONCE pthread_once_t;
 typedef DWORD pthread_t;
 
+#ifndef PTHREAD_MUTEX_INITIALIZER
+#define PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
+#endif
+
+#ifndef PTHREAD_COND_INITIALIZER
+#define PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
+#endif
+
+#ifndef PTHREAD_ONCE_INIT
+#define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
+#endif
+
 static inline int pthread_mutex_init(pthread_mutex_t *m, void *attr) {
     (void)attr;
-    InitializeCriticalSection(m);
+    InitializeSRWLock(m);
     return 0;
 }
 
 static inline int pthread_mutex_destroy(pthread_mutex_t *m) {
-    DeleteCriticalSection(m);
+    (void)m;
     return 0;
 }
 
 static inline int pthread_mutex_lock(pthread_mutex_t *m) {
-    EnterCriticalSection(m);
+    AcquireSRWLockExclusive(m);
     return 0;
 }
 
 static inline int pthread_mutex_unlock(pthread_mutex_t *m) {
-    LeaveCriticalSection(m);
+    ReleaseSRWLockExclusive(m);
     return 0;
 }
 

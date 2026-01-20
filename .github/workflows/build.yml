@@ -53,35 +53,35 @@ jobs:
     - name: Resolve OpenSSL paths
       shell: pwsh
       run: |
-      $possible_roots = @(
-        "C:\Program Files\OpenSSL-Win64",
-        "C:\Program Files\OpenSSL",
-        "C:\OpenSSL-Win64",
-        "C:\OpenSSL"
-      )
-      $openssl_root = $possible_roots | Where-Object { Test-Path $_ } | Select-Object -First 1
-      if (-not $openssl_root) {
-        Write-Error "OpenSSL root not found."
-        exit 1
-      }
+        $possible_roots = @(
+          "C:\Program Files\OpenSSL-Win64",
+          "C:\Program Files\OpenSSL",
+          "C:\OpenSSL-Win64",
+          "C:\OpenSSL"
+        )
+        $openssl_root = $possible_roots | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if (-not $openssl_root) {
+          Write-Error "OpenSSL root not found."
+          exit 1
+        }
 
-      $crypto = Get-ChildItem -Path $openssl_root -Recurse -Filter "libcrypto.lib" | Select-Object -First 1
-      $ssl = Get-ChildItem -Path $openssl_root -Recurse -Filter "libssl.lib" | Select-Object -First 1
-      if (-not $crypto -or -not $ssl) {
-        Write-Error "OpenSSL libraries not found under $openssl_root"
-        exit 1
-      }
+        $crypto = Get-ChildItem -Path $openssl_root -Recurse -Filter "libcrypto.lib" | Select-Object -First 1
+        $ssl = Get-ChildItem -Path $openssl_root -Recurse -Filter "libssl.lib" | Select-Object -First 1
+        if (-not $crypto -or -not $ssl) {
+          Write-Error "OpenSSL libraries not found under $openssl_root"
+          exit 1
+        }
 
-      $include_dir = Join-Path $openssl_root "include"
-      if (-not (Test-Path $include_dir)) {
-        Write-Error "OpenSSL include dir not found: $include_dir"
-        exit 1
-      }
+        $include_dir = Join-Path $openssl_root "include"
+        if (-not (Test-Path $include_dir)) {
+          Write-Error "OpenSSL include dir not found: $include_dir"
+          exit 1
+        }
 
-      "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
-      "OPENSSL_CRYPTO_LIBRARY=$($crypto.FullName)" >> $env:GITHUB_ENV
-      "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
-      "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
+        "OPENSSL_ROOT_DIR=$openssl_root" >> $env:GITHUB_ENV
+        "OPENSSL_CRYPTO_LIBRARY=$($crypto.FullName)" >> $env:GITHUB_ENV
+        "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
+        "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
 
     - name: Configure Meson
       shell: pwsh

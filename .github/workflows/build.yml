@@ -171,6 +171,17 @@ jobs:
           Get-Content $cache | Select-String -Pattern "OPENSSL|OpenSSL" -Context 0,2
         }
 
+    - name: Upload build logs (Windows)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-build-logs
+        path: |
+          build/meson-logs/meson-log.txt
+          build/subprojects/picoquic/__CMake_build/CMakeFiles/CMakeError.log
+          build/subprojects/picoquic/__CMake_build/CMakeFiles/CMakeOutput.log
+          build/subprojects/picoquic/__CMake_build/CMakeCache.txt
+
     - name: Fail if Meson configure failed
       if: steps.meson_configure.outcome != 'success'
       shell: pwsh

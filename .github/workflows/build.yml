@@ -47,13 +47,15 @@ jobs:
     - name: Install dependencies
       run: |
         pip install meson ninja
-        choco install openssl
+        choco install openssl --no-progress --params "/Dir:C:\OpenSSL"
         choco install pkgconfiglite
 
     - name: Configure Meson
       shell: pwsh
       run: |
-        $env:OPENSSL_ROOT_DIR = "C:\Program Files\OpenSSL-Win64"
+        $env:OPENSSL_ROOT_DIR = "C:\OpenSSL"
+        echo "Listing OpenSSL dir to verify:"
+        ls "C:\OpenSSL"
         meson setup --buildtype=release -Db_lto=false --warnlevel=0 build
 
     - name: Compile

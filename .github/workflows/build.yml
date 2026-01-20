@@ -134,7 +134,7 @@ jobs:
         echo "Include: $include_dir"
 
         # Pass options to Meson
-        meson setup --buildtype=release -Db_lto=false --warnlevel=0 build `
+        meson setup --buildtype=release -Db_lto=false --warnlevel=0 -Dcmake_generator=Ninja build `
             "-Dopenssl_root=$root_dir" `
             "-Dopenssl_crypto_lib=$crypto_lib" `
             "-Dopenssl_ssl_lib=$ssl_lib" `
@@ -148,6 +148,27 @@ jobs:
           Get-Content "build/meson-logs/meson-log.txt"
         } else {
           Write-Host "No meson log found."
+        }
+
+    - name: Show CMake logs
+      if: always()
+      shell: pwsh
+      run: |
+        $cmake_dir = "build/subprojects/picoquic/__CMake_build"
+        $err = Join-Path $cmake_dir "CMakeFiles/CMakeError.log"
+        $out = Join-Path $cmake_dir "CMakeFiles/CMakeOutput.log"
+        $cache = Join-Path $cmake_dir "CMakeCache.txt"
+        if (Test-Path $err) {
+          Write-Host "--- CMakeError.log ---"
+          Get-Content $err
+        }
+        if (Test-Path $out) {
+          Write-Host "--- CMakeOutput.log ---"
+          Get-Content $out
+        }
+        if (Test-Path $cache) {
+          Write-Host "--- CMakeCache.txt (OpenSSL entries) ---"
+          Get-Content $cache | Select-String -Pattern "OPENSSL|OpenSSL" -Context 0,2
         }
 
     - name: Fail if Meson configure failed

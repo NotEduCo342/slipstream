@@ -7,8 +7,8 @@ project(
   meson_version: '>=1.0.0',
   default_options: [
     'buildtype=debugoptimized',
-    'cpp_std=gnu++11',
-    'c_std=gnu11',
+    'cpp_std=c++11',
+    'c_std=c11',
     'default_library=shared',
     'warning_level=everything',
     'b_lto=false',

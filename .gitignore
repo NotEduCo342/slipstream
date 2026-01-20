@@ -16,3 +16,7 @@ unbound.conf
 unbound2.conf
 
 .cache
+
+# CI log artifacts
+windows-build-logs/
+windows-build-logs*.zip

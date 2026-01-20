@@ -102,6 +102,8 @@ slipstream_cli_deps = [
   picoquic_proj.dependency('picoquic-core'),
   picoquic_proj.dependency('picotls-core'),
   picoquic_proj.dependency('picotls-openssl'),
+  picoquic_proj.dependency('picotls-minicrypto'),
+  picoquic_proj.dependency('picotls-fusion'),
 ]
 # Link optional picoquic logging
 if loglib_enabled

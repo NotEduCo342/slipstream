@@ -83,16 +83,26 @@ jobs:
         "OPENSSL_SSL_LIBRARY=$($ssl.FullName)" >> $env:GITHUB_ENV
         "OPENSSL_INCLUDE_DIR=$include_dir" >> $env:GITHUB_ENV
 
+        $root_short = (cmd /c for %I in ("$openssl_root") do @echo %~sI).Trim()
+        $crypto_short = (cmd /c for %I in ("$($crypto.FullName)") do @echo %~sI).Trim()
+        $ssl_short = (cmd /c for %I in ("$($ssl.FullName)") do @echo %~sI).Trim()
+        $include_short = (cmd /c for %I in ("$include_dir") do @echo %~sI).Trim()
+
+        "OPENSSL_ROOT_DIR_SHORT=$root_short" >> $env:GITHUB_ENV
+        "OPENSSL_CRYPTO_LIBRARY_SHORT=$crypto_short" >> $env:GITHUB_ENV
+        "OPENSSL_SSL_LIBRARY_SHORT=$ssl_short" >> $env:GITHUB_ENV
+        "OPENSSL_INCLUDE_DIR_SHORT=$include_short" >> $env:GITHUB_ENV
+
     - name: Configure Meson
       shell: pwsh
       run: |
         echo "Using OpenSSL at: $env:OPENSSL_ROOT_DIR"
 
         # Normalize paths to forward slashes to avoid CMake escaping issues
-        $root_dir = $env:OPENSSL_ROOT_DIR -replace '\\', '/'
-        $crypto_lib = $env:OPENSSL_CRYPTO_LIBRARY -replace '\\', '/'
-        $ssl_lib = $env:OPENSSL_SSL_LIBRARY -replace '\\', '/'
-        $include_dir = $env:OPENSSL_INCLUDE_DIR -replace '\\', '/'
+        $root_dir = $env:OPENSSL_ROOT_DIR_SHORT -replace '\\', '/'
+        $crypto_lib = $env:OPENSSL_CRYPTO_LIBRARY_SHORT -replace '\\', '/'
+        $ssl_lib = $env:OPENSSL_SSL_LIBRARY_SHORT -replace '\\', '/'
+        $include_dir = $env:OPENSSL_INCLUDE_DIR_SHORT -replace '\\', '/'
 
         echo "Normalized paths:"
         echo "Root: $root_dir"
